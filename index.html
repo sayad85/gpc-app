@@ -202,6 +202,7 @@ let DATA=(()=>{
   }catch(e){}
   return JSON.parse(JSON.stringify(DEFAULT));
 })();
+const IMAGES_CACHE = {};
 
 function save(){
   try{
@@ -986,7 +987,7 @@ function exportPDF(chantierId){
     const cAvDZD=c.avanceDZD||0, cAvEUR=c.avanceEUR||0;
     const cNetDZD=Math.max(0,cTotalDZD-cAvDZD);
     const cNetEUR=Math.max(0,cTotalEUR-cAvEUR);
-    const cEcart=prime-cNetEUR;
+    
 
     const depsRows=deps.map(d=>`
       <tr>
@@ -995,7 +996,7 @@ function exportPDF(chantierId){
         <td>${d.description||"—"}</td>
         <td style="text-align:right;font-weight:600;color:${d.devise==="EUR"?"#b45309":"#1d4ed8"}">${fmt(d.montant)} ${d.devise}</td>
       <td><span style="padding:2px 8px;border-radius:4px;font-size:10px;background:${d.status==="Payé"?"#dcfce7":"#fee2e2"};color:${d.status==="Payé"?"#166534":"#991b1b"}">${d.status}</span></td>
-        <td style="text-align:center">${d.justificatif?`<img src="${d.justificatif}" style="width:70px;height:50px;object-fit:cover;border-radius:4px;border:1px solid #e5e7eb"/>`:`<span style="color:#ccc;font-size:10px">—</span>`}</td>
+        <td style="text-align:center">${(d.justificatif||IMAGES_CACHE[d.id])?`<img src="${d.justificatif||IMAGES_CACHE[d.id]}" style="width:70px;height:50px;object-fit:cover;border-radius:4px;border:1px solid #e5e7eb"/>`:`<span style="color:#ccc;font-size:10px">—</span>`}</td>
       </tr>`).join("");
 
     return `
@@ -1013,7 +1014,7 @@ function exportPDF(chantierId){
         ${cAvDZD>0?`<div class="tb"><div class="tl">Avance DZD</div><div class="tv green">-${fmtDZD(cAvDZD)}</div></div><div class="tb"><div class="tl">Net DZD</div><div class="tv red">${fmtDZD(cNetDZD)}</div></div>`:""}
         <div class="tb"><div class="tl">Dépenses EUR</div><div class="tv amber">${fmtEUR(cTotalEUR)}</div></div>
         ${cAvEUR>0?`<div class="tb"><div class="tl">Avance EUR</div><div class="tv green">-${fmtEUR(cAvEUR)}</div></div><div class="tb"><div class="tl">Net EUR</div><div class="tv red">${fmtEUR(cNetEUR)}</div></div>`:""}
-        <div class="tb"><div class="tl">Écart prime/EUR</div><div class="tv ${cEcart>=0?"green":"red"}">${fmtEUR(cEcart)}</div></div>
+        
       </div>
       ${deps.length>0?`<table><thead><tr><th>Date</th><th>Catégorie</th><th>Description</th><th>Montant</th><th>Statut</th><th>Justificatif</th></tr></thead><tbody>${depsRows}</tbody></table>`:`<p style="color:#999;font-style:italic;padding:10px 14px">Aucune dépense enregistrée</p>`}
     </div>`;
@@ -1167,9 +1168,13 @@ function handleAction(el){
     const depData={chantierId,date:document.getElementById("f-date")?.value||new Date().toISOString().split("T")[0],categorie:document.getElementById("f-cat")?.value||getCats()[0],description:document.getElementById("f-desc")?.value||"",status:document.getElementById("f-status")?.value||"Non Payé"};
     const doSave=(finalMontant,finalDevise)=>{
       if(editId){
-DATA.depenses=DATA.depenses.map(d=>d.id===editId?{...d,...depData,montant:finalMontant,devise:finalDevise,justificatif:currentJustifData??d.justificatif??null,updatedAt:new Date().toISOString()}:d);
+        const justif = currentJustifData ?? DATA.depenses.find(d=>d.id===editId)?.justificatif ?? null;
+        if(justif) IMAGES_CACHE[editId] = justif;
+        DATA.depenses=DATA.depenses.map(d=>d.id===editId?{...d,...depData,montant:finalMontant,devise:finalDevise,justificatif:justif,updatedAt:new Date().toISOString()}:d);
       }else{
-DATA.depenses.push({id:uid(),...depData,montant:finalMontant,devise:finalDevise,justificatif:currentJustifData||null,updatedAt:new Date().toISOString()});
+        const newId=uid();
+        if(currentJustifData) IMAGES_CACHE[newId] = currentJustifData;
+        DATA.depenses.push({id:newId,...depData,montant:finalMontant,devise:finalDevise,justificatif:currentJustifData||null,updatedAt:new Date().toISOString()});
       }
       save();
       currentJustifData = null;
@@ -1332,11 +1337,13 @@ const imagesLocales = {};
 DATA.depenses.forEach(d => {
   if(d.justificatif) imagesLocales[d.id] = d.justificatif;
 });
+// Mettre à jour IMAGES_CACHE
+Object.assign(IMAGES_CACHE, imagesLocales);
 
 DATA.chantiers=result.merged.chantiers||DATA.chantiers;
 DATA.depenses=(result.merged.depenses||DATA.depenses).map(d => ({
   ...d,
-  justificatif: imagesLocales[d.id] || d.justificatif || null
+  justificatif: imagesLocales[d.id] || IMAGES_CACHE[d.id] || d.justificatif || null
 }));
     if(result.merged.parametres)DATA.parametres=result.merged.parametres;
     DATA.deletedIds=result.merged.deletedIds||DATA.deletedIds||[];
