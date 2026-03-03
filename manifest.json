@@ -2,7 +2,7 @@
   "name": "Gestion Primes Chantier",
   "short_name": "GPC Pro",
   "description": "Gestion des primes et dépenses de chantier",
-  "start_url": "./index.html",
+  "start_url": "/gpc-app/",
   "display": "standalone",
   "background_color": "#09090b",
   "theme_color": "#f59e0b",
