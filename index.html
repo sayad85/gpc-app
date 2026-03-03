@@ -1,0 +1,1524 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
+<meta name="theme-color" content="#f59e0b"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="GPC Pro"/>
+<title>Gestion Primes Chantier</title>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icons/icon-192.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#09090b;--bg2:#111113;--bg3:#18181b;--border:#27272a;--border2:#3f3f46;--amber:#f59e0b;--green:#10b981;--red:#ef4444;--blue:#60a5fa;--purple:#a78bfa;--text:#fafafa;--text2:#a1a1aa;--text3:#52525b;--font-title:'Syne',sans-serif;--font-body:'DM Sans',sans-serif;--safe-top:env(safe-area-inset-top,0px);--safe-bot:env(safe-area-inset-bottom,0px);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font-body);overflow:hidden}
+#app{display:flex;flex-direction:column;height:100dvh;max-width:430px;margin:0 auto;position:relative;overflow:hidden}
+::-webkit-scrollbar{width:0}
+.header{padding:calc(var(--safe-top) + 14px) 16px 14px;border-bottom:1px solid var(--border);background:var(--bg);display:flex;align-items:center;justify-content:space-between;position:relative;z-index:10;flex-shrink:0}
+.header-brand{display:flex;align-items:center;gap:10px}
+.header-logo{width:36px;height:36px;border-radius:10px;background:var(--amber);display:flex;align-items:center;justify-content:center;font-family:var(--font-title);font-weight:800;font-size:11px;color:#09090b;letter-spacing:-.5px}
+.header-title{font-family:var(--font-title);font-weight:700;font-size:14px;color:var(--text2)}
+.toast{font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;background:#052e16;color:var(--green);transition:opacity .3s;opacity:0;pointer-events:none}
+.toast.show{opacity:1}
+.content{flex:1;overflow-y:auto;padding:20px 16px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.nav{border-top:1px solid var(--border);background:var(--bg);padding:8px 8px calc(var(--safe-bot) + 8px);display:flex;justify-content:space-around;flex-shrink:0}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;border-radius:12px;border:none;cursor:pointer;background:transparent;color:var(--text3);transition:all .2s;font-family:var(--font-body)}
+.nav-btn.active{color:var(--amber);background:rgba(245,158,11,.12)}
+.nav-btn svg{width:22px;height:22px}
+.nav-btn span{font-size:10px;font-weight:600}
+.card{background:var(--bg3);border:1px solid var(--border);border-radius:16px;padding:16px}
+.card.clickable{cursor:pointer;transition:transform .15s}
+.card.clickable:active{transform:scale(.98)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat-label{font-size:11px;color:var(--text3);font-weight:500;margin-bottom:4px}
+.stat-value{font-family:var(--font-title);font-weight:800;font-size:18px}
+.c-amber{color:var(--amber)}.c-green{color:var(--green)}.c-red{color:var(--red)}.c-blue{color:var(--blue)}.c-text2{color:var(--text2)}
+.pill{display:inline-flex;align-items:center;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap}
+.pill-amber{background:rgba(120,53,15,.5);color:#fbbf24;border:1px solid rgba(245,158,11,.3)}
+.pill-green{background:rgba(6,78,59,.5);color:#6ee7b7;border:1px solid rgba(16,185,129,.3)}
+.pill-red{background:rgba(127,29,29,.5);color:#fca5a5;border:1px solid rgba(239,68,68,.3)}
+.pill-blue{background:rgba(30,58,138,.5);color:#93c5fd;border:1px solid rgba(96,165,250,.3)}
+.pill-gray{background:var(--bg2);color:var(--text2);border:1px solid var(--border)}
+.pill-orange{background:rgba(154,52,18,.5);color:#fdba74;border:1px solid rgba(249,115,22,.3)}
+.pills{display:flex;flex-wrap:wrap;gap:5px}
+h1{font-family:var(--font-title);font-weight:800;font-size:24px;letter-spacing:-.5px}
+h2{font-family:var(--font-title);font-weight:700;font-size:18px}
+.page-sub{font-size:13px;color:var(--text3);margin-top:2px}
+.section-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+.space8>*+*{margin-top:8px}.space12>*+*{margin-top:12px}.space16>*+*{margin-top:16px}.space20>*+*{margin-top:20px}
+.row{display:flex;align-items:center}
+.row-between{display:flex;align-items:center;justify-content:space-between}
+.row-start{display:flex;align-items:flex-start;justify-content:space-between}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;cursor:pointer;font-family:var(--font-body);border-radius:12px;font-weight:600;transition:all .15s;padding:12px 20px;font-size:14px}
+.btn:active{transform:scale(.96)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn-primary{background:var(--amber);color:#09090b;font-weight:700}
+.btn-ghost{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
+.btn-danger{background:rgba(127,29,29,.4);color:#fca5a5;border:1px solid rgba(239,68,68,.2)}
+.btn-success{background:rgba(6,78,59,.4);color:#6ee7b7;border:1px solid rgba(16,185,129,.2)}
+.btn-blue{background:rgba(30,58,138,.4);color:#93c5fd;border:1px solid rgba(96,165,250,.2)}
+.btn-orange{background:rgba(154,52,18,.4);color:#fdba74;border:1px solid rgba(249,115,22,.2)}
+.btn-sm{padding:7px 12px;font-size:12px;border-radius:9px}
+.btn-icon{padding:8px;border-radius:10px}
+.btn-fab{position:fixed;bottom:calc(var(--safe-bot) + 80px);right:20px;width:52px;height:52px;border-radius:50%;background:var(--amber);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(245,158,11,.4);cursor:pointer;border:none;transition:all .2s;z-index:5}
+.btn-fab:active{transform:scale(.92)}
+.btn-full{width:100%}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px}
+.field input,.field select,.field textarea{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:12px 14px;font-size:14px;color:var(--text);font-family:var(--font-body);transition:border-color .2s;outline:none;appearance:none;-webkit-appearance:none}
+.field textarea{resize:vertical;min-height:80px}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--amber)}
+.field input::placeholder,.field textarea::placeholder{color:var(--text3)}
+.search-bar{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:10px 14px;font-size:14px;color:var(--text);font-family:var(--font-body);outline:none;width:100%;transition:border-color .2s}
+.search-bar:focus{border-color:var(--amber)}
+.search-bar::placeholder{color:var(--text3)}
+.modal{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;flex-direction:column;animation:slideUp .25s cubic-bezier(.32,.72,0,1);max-width:430px;margin:0 auto}
+@keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}
+@keyframes fadeIn{from{opacity:0}}
+.modal-header{padding:calc(var(--safe-top) + 14px) 16px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0}
+.modal-body{flex:1;overflow-y:auto;padding:20px 16px}
+.modal-body>*+*{margin-top:16px}
+.progress-bg{height:6px;background:var(--bg2);border-radius:99px;overflow:hidden}
+.progress-fill{height:100%;background:var(--amber);border-radius:99px;transition:width .4s}
+.empty{text-align:center;padding:40px 20px;color:var(--text3);font-size:14px}
+.empty-icon{font-size:40px;margin-bottom:12px}
+.filter-tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.filter-tabs::-webkit-scrollbar{display:none}
+.filter-tab{font-size:12px;font-weight:600;padding:6px 12px;border-radius:8px;border:none;cursor:pointer;font-family:var(--font-body);transition:all .15s;background:var(--bg3);color:var(--text3);white-space:nowrap;flex-shrink:0}
+.filter-tab.active{background:var(--amber);color:#09090b}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:100;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .2s;max-width:430px;margin:0 auto}
+.confirm-box{background:var(--bg3);border:1px solid var(--border);border-radius:20px 20px 0 0;padding:24px 16px calc(var(--safe-bot) + 24px);width:100%;animation:slideUp .2s}
+.confirm-box h3{font-family:var(--font-title);font-weight:700;font-size:18px;margin-bottom:8px}
+.confirm-box p{color:var(--text2);font-size:14px;margin-bottom:16px}
+.alert-card{background:rgba(127,29,29,.15);border:1px solid rgba(239,68,68,.3);border-radius:14px;padding:12px 14px;margin-bottom:8px}
+.alert-title{font-size:12px;font-weight:700;color:#fca5a5;margin-bottom:4px}
+.alert-body{font-size:11px;color:var(--text2)}
+/* SVG Charts */
+.chart-wrap{overflow-x:auto;padding-bottom:4px}
+.chart-wrap::-webkit-scrollbar{height:3px}
+.chart-wrap::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.bar-label{font-size:9px;fill:var(--text3, #52525b)}
+.bar-value{font-size:9px;fill:var(--text2, #a1a1aa)}
+.sync-btn{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:10px;border:none;cursor:pointer;font-family:var(--font-body);font-size:12px;font-weight:600;transition:all .2s}
+.sync-idle{background:rgba(96,165,250,.15);color:#93c5fd;border:1px solid rgba(96,165,250,.2)}
+.sync-ok{background:rgba(6,78,59,.3);color:#6ee7b7;border:1px solid rgba(16,185,129,.2)}
+.sync-err{background:rgba(127,29,29,.3);color:#fca5a5;border:1px solid rgba(239,68,68,.2)}
+.sync-spin{animation:spin .8s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.img-progress-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;max-width:430px;margin:0 auto;}
+.img-progress-box{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:24px 20px;width:85%;max-width:320px;}
+.img-progress-title{font-family:var(--font-title);font-weight:700;font-size:15px;margin-bottom:4px;}
+.img-progress-sub{font-size:11px;color:var(--text3);margin-bottom:16px;}
+.img-progress-bar-bg{height:8px;background:var(--bg2);border-radius:99px;overflow:hidden;margin-bottom:10px;}
+.img-progress-bar-fill{height:100%;background:var(--amber);border-radius:99px;transition:width .3s;}
+.img-progress-count{font-size:11px;color:var(--text2);text-align:right;}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <div class="header-brand">
+      <div class="header-logo">GPC</div>
+      <span class="header-title" id="header-title">Primes Chantier</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button class="sync-btn sync-idle" id="sync-header-btn" onclick="syncNow()" title="Synchroniser avec le PC">
+        <span id="sync-icon">⇄</span><span id="sync-label">Sync</span>
+      </button>
+      <span class="toast" id="toast">✓ Sauvegardé</span>
+    </div>
+  </div>
+  <div class="content" id="content"></div>
+  <nav class="nav" id="nav"></nav>
+</div>
+<script>
+  // Détection du clic sur le logo pour ouvrir la config
+document.querySelector('.header-logo').addEventListener('click', () => {
+    const currentIP = DATA.sync?.serverIP || "";
+    const promptIP = prompt("Configuration Synchro PC\nCollez votre lien Ngrok ici :", currentIP);
+    
+    if (promptIP !== null) {
+        if (!DATA.sync) DATA.sync = {};
+        DATA.sync.serverIP = promptIP.trim();
+        save();
+        alert("✅ Adresse enregistrée ! Appuyez sur SYNC pour tester.");
+    }
+});
+// ═══════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════
+const STORAGE_KEY="gpc_v3",STORAGE_KEY_OLD="gpc_v2";
+const uid=()=>Math.random().toString(36).slice(2,9);
+const esc=s=>s==null?"":String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const DEFAULT_CATS=["Transport","Repas","Hébergement","Matériel","Communication","Divers"];
+const DEFAULT={
+  chantiers:[
+    {id:"c1",nom:"CIP Alexandria",jours:25,localisation:"",type:"Externe",dateDebut:"2026-01-09",status:"Non payé",tauxInterne:130,tauxExterne:130,avanceDZD:0,avanceEUR:0,notes:""},
+    {id:"c2",nom:"Ovital",jours:1,localisation:"",type:"Interne",dateDebut:"",status:"Non payé",tauxInterne:130,tauxExterne:130,avanceDZD:0,avanceEUR:0,notes:""},
+    {id:"c3",nom:"ABC Pepsi",jours:3,localisation:"",type:"Interne",dateDebut:"",status:"Non payé",tauxInterne:130,tauxExterne:130,avanceDZD:0,avanceEUR:0,notes:""},
+    {id:"c4",nom:"Mansourah",jours:14,localisation:"TLEMCEN",type:"Interne",dateDebut:"2026-02-19",status:"Non payé",tauxInterne:130,tauxExterne:130,avanceDZD:0,avanceEUR:0,notes:""},
+    {id:"c5",nom:"Eau Saida",jours:3,localisation:"à Distance",type:"Interne",dateDebut:"2026-02-19",status:"Non payé",tauxInterne:40,tauxExterne:40,avanceDZD:0,avanceEUR:0,notes:""},
+  ],
+  depenses:[
+    {id:"d1",justificatif:null,chantierId:"c1",date:"2026-02-15",categorie:"Transport",description:"taxi oudhias alger",montant:6000,devise:"DZD",status:"Non Payé"},
+    {id:"d2",justificatif:null,chantierId:"c1",date:"2026-02-02",categorie:"Transport",description:"taxi retour",montant:6000,devise:"DZD",status:"Non Payé"},
+    {id:"d3",justificatif:null,chantierId:"c1",date:"2026-01-09",categorie:"Repas",description:"repas aéroport alger",montant:800,devise:"DZD",status:"Non Payé"},
+    {id:"d4",justificatif:null,chantierId:"c2",date:"2026-02-15",categorie:"Transport",description:"frais kilometrage",montant:7680,devise:"DZD",status:"Non Payé"},
+    {id:"d5",justificatif:null,chantierId:"c3",date:"2026-02-15",categorie:"Transport",description:"taxi",montant:14400,devise:"DZD",status:"Non Payé"},
+    {id:"d6",justificatif:null,chantierId:"c4",date:"2026-02-17",categorie:"Transport",description:"-",montant:12000,devise:"DZD",status:"Non Payé"},
+  ],
+  parametres:{
+    tauxInterne:130,tauxExterne:130,alerteJours:30,
+    taux:{DZD:{dzd:1,eur:0.0063},EUR:{dzd:280,eur:1},USD:{dzd:250,eur:0.8929}},
+    profil:{nom:"",prenom:"",matricule:"",entreprise:""},
+    categories:[...DEFAULT_CATS]
+  },
+  sync:{ serverIP:"", lastSync:null },
+  deletedIds:[]  // [{id, type, deletedAt}]
+};
+
+function migrateOld(o){
+  if(!o)return null;
+  if(o.chantiers)o.chantiers=o.chantiers.map(c=>({avanceDZD:0,avanceEUR:0,notes:"",...c}));
+  if(o.depenses)o.depenses=o.depenses.map(d=>({justificatif:null,...d}));
+  if(o.parametres){
+    if(!o.parametres.profil)o.parametres.profil={nom:"",prenom:"",matricule:"",entreprise:""};
+    if(!o.parametres.categories)o.parametres.categories=[...DEFAULT_CATS];
+    if(!o.parametres.alerteJours)o.parametres.alerteJours=30;
+  }
+  if(!o.sync)o.sync={serverIP:"",lastSync:null};
+  if(!o.deletedIds)o.deletedIds=[];
+  return o;
+}
+let DATA=(()=>{
+  try{
+    const v3=JSON.parse(localStorage.getItem(STORAGE_KEY));if(v3)return v3;
+    const v2=JSON.parse(localStorage.getItem(STORAGE_KEY_OLD));if(v2){const m=migrateOld(v2);if(m)return m;}
+  }catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT));
+})();
+
+function save(){
+  try{
+    const dataToStore={
+      ...DATA,
+      depenses:DATA.depenses.map(d=>({...d,justificatif:null}))
+    };
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(dataToStore));
+  }
+  catch(e){showToast("⚠️ Stockage plein");return;}
+  showToast("✓ Sauvegardé");
+}
+function showToast(msg){
+  const t=document.getElementById("toast");
+  if(!t)return;
+  t.textContent=msg;t.classList.add("show");
+  setTimeout(()=>{t.classList.remove("show");t.textContent="✓ Sauvegardé";},2000);
+}
+
+// ═══════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════
+const fmt=(n,d=0)=>n==null?"—":Number(n).toLocaleString("fr-FR",{minimumFractionDigits:d,maximumFractionDigits:d});
+const fmtEUR=n=>`${fmt(n,2)} €`;
+const fmtDZD=n=>`${fmt(n)} DZD`;
+const getCats=()=>DATA.parametres.categories||DEFAULT_CATS;
+function calcPrime(c){const t=c.type==="Externe"?(c.tauxExterne||130):(c.tauxInterne||130);return(c.jours||0)*t;}
+function toEUR(m,dev){return m*(DATA.parametres.taux[dev]?.eur||1);}
+function daysSince(dateStr){
+  if(!dateStr)return 9999;
+  return Math.floor((Date.now()-new Date(dateStr).getTime())/(1000*86400));
+}
+
+// ═══════════════════════════════════════════════════════
+// IMAGE — géré par script séparé (upload-images.html)
+// ═══════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════
+// CHARTS (SVG natif, sans lib)
+// ═══════════════════════════════════════════════════════
+function svgBarChart(items, color="#f59e0b", height=80){
+  // items = [{label, value}]
+  if(!items.length)return "";
+  const W=Math.max(items.length*42, 300);
+  const maxV=Math.max(...items.map(i=>i.value),1);
+  const barW=28, gap=14, padL=8, padB=28, padT=16;
+  const chartH=height-padB-padT;
+  const bars=items.map((item,i)=>{
+    const x=padL+i*(barW+gap);
+    const bh=Math.round((item.value/maxV)*chartH);
+    const y=padT+chartH-bh;
+    const valLabel=item.value>0?(item.value>=1000?Math.round(item.value/1000)+"k":item.value):"";
+    return `
+      <rect x="${x}" y="${y}" width="${barW}" height="${bh}" rx="4" fill="${color}" opacity="0.85"/>
+      ${item.value>0?`<text x="${x+barW/2}" y="${y-3}" text-anchor="middle" class="bar-value">${valLabel}</text>`:""}
+      <text x="${x+barW/2}" y="${height-6}" text-anchor="middle" class="bar-label">${item.label}</text>`;
+  }).join("");
+  return `<div class="chart-wrap"><svg width="${W}" height="${height}" style="display:block">${bars}</svg></div>`;
+}
+
+function getMonthlyData(depenses, devise){
+  const months={};
+  const now=new Date();
+  for(let i=11;i>=0;i--){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+    const label=d.toLocaleDateString("fr-FR",{month:"short"}).replace(".","");
+    months[key]={label,value:0};
+  }
+  depenses.filter(d=>d.devise===devise).forEach(d=>{
+    const key=d.date?.slice(0,7);
+    if(months[key])months[key].value+=d.montant;
+  });
+  return Object.values(months);
+}
+
+function getYearlyJours(){
+  const byYear={};
+  DATA.chantiers.forEach(c=>{
+    if(!c.dateDebut)return;
+    const y=c.dateDebut.slice(0,4);
+    byYear[y]=(byYear[y]||0)+(c.jours||0);
+  });
+  const currentYear=new Date().getFullYear();
+  const years=[];
+  for(let y=currentYear-3;y<=currentYear;y++){
+    years.push({label:String(y),value:byYear[String(y)]||0});
+  }
+  return years;
+}
+
+// ═══════════════════════════════════════════════════════
+// ICONS
+// ═══════════════════════════════════════════════════════
+const svgIcon=(d,size=22)=>`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg>`;
+const ICO={
+  home:"M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z M9 22V12h6v10",
+  site:"M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z M12 10m-3 0a3 3 0 106 0 3 3 0 00-6 0",
+  exp:"M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6",
+  cog:"M12.22 2h-.44a2 2 0 00-2 2v.18a2 2 0 01-1 1.73l-.43.25a2 2 0 01-2 0l-.15-.08a2 2 0 00-2.73.73l-.22.38a2 2 0 00.73 2.73l.15.1a2 2 0 011 1.72v.51a2 2 0 01-1 1.74l-.15.09a2 2 0 00-.73 2.73l.22.38a2 2 0 002.73.73l.15-.08a2 2 0 012 0l.43.25a2 2 0 011 1.73V20a2 2 0 002 2h.44a2 2 0 002-2v-.18a2 2 0 011-1.73l.43-.25a2 2 0 012 0l.15.08a2 2 0 002.73-.73l.22-.39a2 2 0 00-.73-2.73l-.15-.08a2 2 0 01-1-1.74v-.5a2 2 0 011-1.74l.15-.09a2 2 0 00.73-2.73l-.22-.38a2 2 0 00-2.73-.73l-.15.08a2 2 0 01-2 0l-.43-.25a2 2 0 01-1-1.73V4a2 2 0 00-2-2z M15 12a3 3 0 11-6 0 3 3 0 016 0",
+  plus:"M12 5v14M5 12h14",back:"M19 12H5M12 19l-7-7 7-7",
+  edit:"M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z",
+  trash:"M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6",
+  check:"M20 6L9 17l-5-5",x:"M18 6L6 18M6 6l12 12",
+  save:"M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z M17 21v-8H7v8M7 3v5h8",
+  search:"M21 21l-4.35-4.35M17 11A6 6 0 105 11a6 6 0 0012 0z",
+  bell:"M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0",
+  chart:"M18 20V10M12 20V4M6 20v-6",
+};
+const I=(name,size=20)=>svgIcon(ICO[name],size);
+
+// ═══════════════════════════════════════════════════════
+// RENDER ENGINE
+// ═══════════════════════════════════════════════════════
+let currentTab="dashboard",modalStack=[],pageAbortController=null;
+
+function render(){
+  document.getElementById("content").innerHTML=getPage(currentTab);
+  document.getElementById("nav").innerHTML=renderNav();
+  attachPageEvents();
+}
+function renderNav(){
+  const tabs=[
+    {id:"dashboard",icon:"home",label:"Accueil"},
+    {id:"chantiers",icon:"site",label:"Chantiers"},
+    {id:"depenses",icon:"exp",label:"Dépenses"},
+    {id:"stats",icon:"chart",label:"Stats"},
+    {id:"parametres",icon:"cog",label:"Config"},
+  ];
+  return tabs.map(t=>`<button class="nav-btn ${currentTab===t.id?"active":""}" data-tab="${t.id}">${I(t.icon,22)}<span>${t.label}</span></button>`).join("");
+}
+function switchTab(tab){currentTab=tab;render();}
+function getPage(tab){
+  if(tab==="dashboard")return pageDashboard();
+  if(tab==="chantiers")return pageChantiers();
+  if(tab==="depenses")return pageDepenses();
+  if(tab==="stats")return pageStats();
+  if(tab==="parametres")return pageParametres();
+  return "";
+}
+
+// ═══════════════════════════════════════════════════════
+// ALERTES
+// ═══════════════════════════════════════════════════════
+function getAlertes(){
+  const seuil=DATA.parametres.alerteJours||30;
+  const alerts=[];
+  DATA.depenses.filter(d=>d.status==="Non Payé").forEach(d=>{
+    const age=daysSince(d.date);
+    if(age>=seuil){
+      const ch=DATA.chantiers.find(c=>c.id===d.chantierId);
+      alerts.push({dep:d,ch,age});
+    }
+  });
+  return alerts.sort((a,b)=>b.age-a.age);
+}
+
+// ═══════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════
+function pageDashboard(){
+  const ch=DATA.chantiers,deps=DATA.depenses;
+  const totalJours=ch.reduce((s,c)=>s+(c.jours||0),0);
+  const totalPrime=ch.reduce((s,c)=>s+calcPrime(c),0);
+  const primePayee=ch.filter(c=>c.status==="Payé").reduce((s,c)=>s+calcPrime(c),0);
+  const depsNP=deps.filter(d=>d.status==="Non Payé");
+  const totalDZD_NP=depsNP.filter(d=>d.devise==="DZD").reduce((s,d)=>s+d.montant,0);
+  const totalEUR_NP=depsNP.filter(d=>d.devise==="EUR").reduce((s,d)=>s+d.montant,0);
+  const avDZD=ch.reduce((s,c)=>s+(c.avanceDZD||0),0);
+  const avEUR=ch.reduce((s,c)=>s+(c.avanceEUR||0),0);
+  const netDZD=Math.max(0,totalDZD_NP-avDZD),netEUR=Math.max(0,totalEUR_NP-avEUR);
+  const alerts=getAlertes();
+
+  return `<div class="space20">
+    <div><h1>Tableau de bord</h1><p class="page-sub">${ch.length} chantier${ch.length!==1?"s":""} · ${totalJours} jours</p></div>
+
+    ${alerts.length>0?`
+    <div>
+      <div class="section-label" style="color:var(--red)">🔔 Alertes — Non remboursé depuis +${DATA.parametres.alerteJours||30}j</div>
+      ${alerts.slice(0,3).map(a=>`
+      <div class="alert-card">
+        <div class="alert-title">${a.dep.description||"—"} · ${fmt(a.dep.montant)} ${a.dep.devise}</div>
+        <div class="alert-body">${a.ch?.nom||"?"} · <strong style="color:#fca5a5">${a.age} jours</strong> sans remboursement</div>
+      </div>`).join("")}
+      ${alerts.length>3?`<div style="font-size:11px;color:var(--text3);text-align:center">+${alerts.length-3} autres alertes</div>`:""}
+    </div>`:""}
+
+    <div class="grid2">
+      <div class="card"><div class="stat-label">Total jours</div><div class="stat-value c-blue">${fmt(totalJours)}</div></div>
+      <div class="card"><div class="stat-label">Primes totales</div><div class="stat-value c-amber">${fmtEUR(totalPrime)}</div></div>
+      <div class="card"><div class="stat-label">Primes payées</div><div class="stat-value c-green">${fmtEUR(primePayee)}</div></div>
+      <div class="card"><div class="stat-label">Non payées</div><div class="stat-value c-red">${fmtEUR(totalPrime-primePayee)}</div></div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">Dépenses non remboursées</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="card" style="padding:12px;border-left:3px solid #60a5fa">
+          <div class="stat-label">En DZD</div>
+          <div style="font-family:var(--font-title);font-weight:800;font-size:15px;color:#60a5fa">${fmtDZD(totalDZD_NP)}</div>
+          ${avDZD>0?`<div style="font-size:11px;color:var(--green);margin-top:3px">Avances: -${fmtDZD(avDZD)}</div><div style="font-weight:700;font-size:12px;color:var(--amber)">Net: ${fmtDZD(netDZD)}</div>`:""}
+        </div>
+        <div class="card" style="padding:12px;border-left:3px solid var(--amber)">
+          <div class="stat-label">En EUR</div>
+          <div style="font-family:var(--font-title);font-weight:800;font-size:15px;color:var(--amber)">${fmtEUR(totalEUR_NP)}</div>
+          ${avEUR>0?`<div style="font-size:11px;color:var(--green);margin-top:3px">Avances: -${fmtEUR(avEUR)}</div><div style="font-weight:700;font-size:12px;color:var(--amber)">Net: ${fmtEUR(netEUR)}</div>`:""}
+        </div>
+      </div>
+    </div>
+
+    ${ch.filter(c=>c.status!=="Payé").length>0?`
+    <div class="card">
+      <div class="section-label">Chantiers en attente</div>
+      <div class="space8">
+        ${ch.filter(c=>c.status!=="Payé").map(c=>`
+        <div class="row-between" style="padding:8px 0;border-bottom:1px solid var(--border)">
+          <div><div style="font-size:13px;font-weight:600">${c.nom}</div><div style="font-size:11px;color:var(--text3)">${c.jours} j · ${c.type}</div></div>
+          <div style="font-size:13px;font-weight:700;color:var(--amber)">${fmtEUR(calcPrime(c))}</div>
+        </div>`).join("")}
+      </div>
+    </div>`:""}
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// PAGE STATS
+// ═══════════════════════════════════════════════════════
+function pageStats(){
+  const dzdMonthly=getMonthlyData(DATA.depenses,"DZD");
+  const eurMonthly=getMonthlyData(DATA.depenses,"EUR");
+  const yearlyJours=getYearlyJours();
+  const totalJoursAn=DATA.chantiers.filter(c=>{
+    if(!c.dateDebut)return false;
+    return c.dateDebut.startsWith(String(new Date().getFullYear()));
+  }).reduce((s,c)=>s+(c.jours||0),0);
+  const byCatDZD={},byCatEUR={};
+  DATA.depenses.forEach(d=>{
+    if(d.devise==="DZD")byCatDZD[d.categorie]=(byCatDZD[d.categorie]||0)+d.montant;
+    if(d.devise==="EUR")byCatEUR[d.categorie]=(byCatEUR[d.categorie]||0)+d.montant;
+  });
+  const maxDZD=Math.max(...Object.values(byCatDZD),1);
+  const maxEUR=Math.max(...Object.values(byCatEUR),1);
+
+  return `<div class="space16">
+    <div><h1>Statistiques</h1><p class="page-sub">Graphiques & analyses</p></div>
+
+    <div class="card">
+      <div class="section-label">📅 Jours travaillés par année</div>
+      <div style="margin-bottom:8px;font-family:var(--font-title);font-weight:800;font-size:22px;color:var(--blue)">${totalJoursAn} <span style="font-size:13px;font-weight:400;color:var(--text3)">jours en ${new Date().getFullYear()}</span></div>
+      ${svgBarChart(yearlyJours,"#60a5fa",90)}
+    </div>
+
+    <div class="card">
+      <div class="section-label">📊 Dépenses mensuelles — DZD (12 mois)</div>
+      ${svgBarChart(dzdMonthly,"#60a5fa",90)}
+    </div>
+
+    ${eurMonthly.some(m=>m.value>0)?`
+    <div class="card">
+      <div class="section-label">📊 Dépenses mensuelles — EUR (12 mois)</div>
+      ${svgBarChart(eurMonthly,"#f59e0b",90)}
+    </div>`:""}
+
+    ${Object.keys(byCatDZD).length>0?`
+    <div class="card">
+      <div class="section-label">Par catégorie — DZD</div>
+      <div class="space8">
+        ${Object.entries(byCatDZD).sort((a,b)=>b[1]-a[1]).map(([cat,val])=>`
+        <div>
+          <div class="row-between" style="margin-bottom:4px"><span style="font-size:12px;color:var(--text2)">${cat}</span><span style="font-size:12px;font-weight:600">${fmtDZD(val)}</span></div>
+          <div class="progress-bg"><div class="progress-fill" style="width:${Math.round(val/maxDZD*100)}%;background:#60a5fa"></div></div>
+        </div>`).join("")}
+      </div>
+    </div>`:""}
+
+    ${Object.keys(byCatEUR).length>0?`
+    <div class="card">
+      <div class="section-label">Par catégorie — EUR</div>
+      <div class="space8">
+        ${Object.entries(byCatEUR).sort((a,b)=>b[1]-a[1]).map(([cat,val])=>`
+        <div>
+          <div class="row-between" style="margin-bottom:4px"><span style="font-size:12px;color:var(--text2)">${cat}</span><span style="font-size:12px;font-weight:600">${fmtEUR(val)}</span></div>
+          <div class="progress-bg"><div class="progress-fill" style="width:${Math.round(val/maxEUR*100)}%"></div></div>
+        </div>`).join("")}
+      </div>
+    </div>`:""}
+
+    ${getAlertes().length>0?`
+    <div class="card" style="border-color:rgba(239,68,68,.3)">
+      <div class="section-label" style="color:var(--red)">🔔 Toutes les alertes (${getAlertes().length})</div>
+      <div class="space8">
+        ${getAlertes().map(a=>`
+        <div class="alert-card" style="margin-bottom:0">
+          <div class="alert-title">${a.dep.description||"—"} — ${fmt(a.dep.montant)} ${a.dep.devise}</div>
+          <div class="alert-body">${a.ch?.nom||"?"} · <strong style="color:#fca5a5">${a.age} jours</strong></div>
+        </div>`).join("")}
+      </div>
+    </div>`:""}
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// CHANTIERS
+// ═══════════════════════════════════════════════════════
+function pageChantiers(){
+  const ch=DATA.chantiers;
+  return `<div class="space16">
+    <div><h1>Chantiers</h1><p class="page-sub">${ch.length} chantier${ch.length!==1?"s":""}</p></div>
+    ${ch.length===0?`<div class="empty"><div class="empty-icon">🏗️</div><p>Aucun chantier</p></div>`:`
+    <div class="space12">${ch.map(c=>{
+      const prime=calcPrime(c);
+      const deps=DATA.depenses.filter(d=>d.chantierId===c.id);
+      const totalDZD=deps.filter(d=>d.devise==="DZD").reduce((s,d)=>s+d.montant,0);
+      const totalEUR=deps.filter(d=>d.devise==="EUR").reduce((s,d)=>s+d.montant,0);
+      return `<div class="card clickable" data-action="chantier-detail" data-id="${c.id}">
+        <div class="row-start" style="margin-bottom:8px">
+          <div style="flex:1;min-width:0;margin-right:8px"><div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(c.nom)}</div>${c.localisation?`<div style="font-size:11px;color:var(--text3);margin-top:2px">${esc(c.localisation)}</div>`:""}</div>
+          <span class="pill ${c.status==="Payé"?"pill-green":"pill-red"}">${c.status}</span>
+        </div>
+        <div class="pills" style="margin-bottom:10px">
+          <span class="pill ${c.type==="Externe"?"pill-blue":"pill-amber"}">${c.type}</span>
+          <span class="pill pill-gray">${c.jours} j</span>
+          ${c.dateDebut?`<span class="pill pill-gray">${c.dateDebut}</span>`:""}
+          ${(c.avanceDZD||0)>0||(c.avanceEUR||0)>0?`<span class="pill pill-green">Avance</span>`:""}
+          ${c.notes?`<span class="pill pill-gray">📝</span>`:""}
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;font-size:12px">
+          <span style="color:var(--text3)">Prime: <strong style="color:var(--amber)">${fmtEUR(prime)}</strong></span>
+          ${totalDZD?`<span style="color:var(--text3)">DZD: <strong style="color:#60a5fa">${fmtDZD(totalDZD)}</strong></span>`:""}
+          ${totalEUR?`<span style="color:var(--text3)">EUR: <strong style="color:var(--red)">${fmtEUR(totalEUR)}</strong></span>`:""}
+        </div>
+      </div>`;
+    }).join("")}</div>`}
+  </div>
+  <button class="btn-fab" data-action="chantier-new">${I("plus",24)}</button>`;
+}
+
+function modalChantierDetail(id){
+  const c=DATA.chantiers.find(x=>x.id===id);if(!c)return;
+  const prime=calcPrime(c);
+  const deps=DATA.depenses.filter(d=>d.chantierId===id);
+  const totalDepDZD=deps.filter(d=>d.devise==="DZD").reduce((s,d)=>s+d.montant,0);
+  const totalDepEUR=deps.filter(d=>d.devise==="EUR").reduce((s,d)=>s+d.montant,0);
+  const avDZD=c.avanceDZD||0,avEUR=c.avanceEUR||0;
+  const netDZD=Math.max(0,totalDepDZD-avDZD),netEUR=Math.max(0,totalDepEUR-avEUR);
+  const ecart=prime-netEUR;
+  const html=`<div class="space16">
+    <div class="row-start">
+      <div style="flex:1;min-width:0;margin-right:8px"><h2>${esc(c.nom)}</h2>
+        <div class="pills" style="margin-top:8px">
+          <span class="pill ${c.type==="Externe"?"pill-blue":"pill-amber"}">${c.type}</span>
+          <span class="pill ${c.status==="Payé"?"pill-green":"pill-red"}">${c.status}</span>
+          ${c.localisation?`<span class="pill pill-gray">${esc(c.localisation)}</span>`:""}
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost btn-icon" data-action="chantier-edit" data-id="${id}">${I("edit")}</button>
+        <button class="btn btn-danger btn-icon" data-action="chantier-delete" data-id="${id}">${I("trash")}</button>
+      </div>
+    </div>
+
+    ${c.notes?`<div class="card" style="padding:12px;border-color:rgba(167,139,250,.3)"><div class="section-label" style="color:var(--purple)">📝 Notes</div><div style="font-size:13px;color:var(--text2);white-space:pre-wrap">${esc(c.notes)}</div></div>`:""}
+
+    <div class="grid2">
+      <div class="card"><div class="stat-label">Jours</div><div class="stat-value c-blue">${fmt(c.jours)}</div></div>
+      <div class="card"><div class="stat-label">Prime</div><div class="stat-value c-amber">${fmtEUR(prime)}</div></div>
+    </div>
+    <div class="card">
+      <div class="section-label">Dépenses & Avances</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="card" style="padding:10px;border-left:3px solid #60a5fa">
+          <div class="stat-label">Dépenses DZD</div>
+          <div style="font-weight:800;font-size:15px;color:#60a5fa">${fmtDZD(totalDepDZD)}</div>
+          ${avDZD>0?`<div style="font-size:11px;color:var(--green);margin-top:3px">Avance: -${fmtDZD(avDZD)}</div><div style="font-size:12px;font-weight:700;color:${netDZD>0?"var(--red)":"var(--green)"}">${fmtDZD(netDZD)}</div>`:""}
+        </div>
+        <div class="card" style="padding:10px;border-left:3px solid var(--amber)">
+          <div class="stat-label">Dépenses EUR</div>
+          <div style="font-weight:800;font-size:15px;color:var(--amber)">${fmtEUR(totalDepEUR)}</div>
+          ${avEUR>0?`<div style="font-size:11px;color:var(--green);margin-top:3px">Avance: -${fmtEUR(avEUR)}</div><div style="font-size:12px;font-weight:700;color:${netEUR>0?"var(--red)":"var(--green)"}">${fmtEUR(netEUR)}</div>`:""}
+        </div>
+      </div>
+      ${totalDepEUR>0?`<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)"><div class="stat-label">Écart prime − dép. EUR</div><div style="font-weight:700;font-size:16px;color:${ecart>=0?"var(--green)":"var(--red)"}">${fmtEUR(ecart)}</div></div>`:""}
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn ${c.status==="Payé"?"btn-ghost":"btn-success"}" style="flex:1" data-action="chantier-toggle" data-id="${id}">${c.status==="Payé"?`${I("x",16)} Non payé`:`${I("check",16)} Payé`}</button>
+      <button class="btn btn-blue" style="flex:1" data-action="export-pdf-chantier" data-id="${id}">📄 PDF</button>
+    </div>
+    <div class="row-between">
+      <span style="font-weight:700;font-size:14px">Dépenses (${deps.length})</span>
+      <button class="btn btn-primary btn-sm" data-action="dep-new-for" data-chantier-id="${id}">${I("plus",16)} Ajouter</button>
+    </div>
+    ${deps.length===0?`<div class="empty"><div class="empty-icon">📋</div><p>Aucune dépense</p></div>`:`
+    <div class="space8">${deps.map(d=>`
+    <div class="card">
+      <div class="row-between" style="margin-bottom:6px">
+        <div style="flex:1;min-width:0;margin-right:8px">
+          <div style="font-size:13px;font-weight:600">${d.description||"—"}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">${d.date}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="font-size:13px;font-weight:700;color:${d.devise==="EUR"?"var(--amber)":"#60a5fa"}">${fmt(d.montant)} ${d.devise}</div>
+        </div>
+      </div>
+      <div class="row-between">
+        <div class="pills"><span class="pill pill-gray">${d.categorie}</span><span class="pill ${d.status==="Payé"?"pill-green":"pill-red"}">${d.status}</span>${d.justificatif?`<span class="pill pill-blue">🖼 Justif</span>`:""}</div>
+        <div style="display:flex;gap:5px">
+          ${d.justificatif?`<button class="btn btn-blue btn-icon btn-sm" data-action="dep-justif" data-id="${d.id}">🖼</button>`:""}
+          <button class="btn btn-orange btn-icon btn-sm" data-action="dep-edit" data-id="${d.id}">${I("edit",15)}</button>
+          <button class="btn btn-success btn-icon btn-sm" data-action="dep-toggle" data-id="${d.id}">${I("check",15)}</button>
+          <button class="btn btn-danger btn-icon btn-sm" data-action="dep-delete" data-id="${d.id}">${I("trash",15)}</button>
+        </div>
+      </div>
+    </div>`).join("")}</div>`}
+  </div>`;
+  openModal("Détail chantier",html,()=>{});
+}
+
+function modalChantierForm(id){
+  const isEdit=!!id;
+  const c=isEdit?DATA.chantiers.find(x=>x.id===id):{nom:"",jours:"",localisation:"",type:"Externe",dateDebut:"",status:"Non payé",tauxInterne:DATA.parametres.tauxInterne,tauxExterne:DATA.parametres.tauxExterne,avanceDZD:0,avanceEUR:0,notes:""};
+  const html=`<div class="space16">
+    <div class="field"><label>Nom du chantier *</label><input id="f-nom" type="text" value="${c.nom}" placeholder="Ex: Mansourah TLEMCEN"/></div>
+    <div class="grid2">
+      <div class="field"><label>Jours</label><input id="f-jours" type="number" value="${c.jours}" placeholder="0" inputmode="numeric"/></div>
+      <div class="field"><label>Type</label><select id="f-type"><option ${c.type==="Externe"?"selected":""}>Externe</option><option ${c.type==="Interne"?"selected":""}>Interne</option></select></div>
+    </div>
+    <div class="field"><label>Localisation</label><input id="f-loc" type="text" value="${c.localisation}" placeholder="Ville / à Distance"/></div>
+    <div class="field"><label>Date de début</label><input id="f-date" type="date" value="${c.dateDebut}"/></div>
+    <div class="grid2">
+      <div class="field"><label>Taux Interne (€/j)</label><input id="f-ti" type="number" value="${c.tauxInterne}" inputmode="numeric"/></div>
+      <div class="field"><label>Taux Externe (€/j)</label><input id="f-te" type="number" value="${c.tauxExterne}" inputmode="numeric"/></div>
+    </div>
+    <div class="card" style="padding:12px;border-color:rgba(16,185,129,.3);background:rgba(16,185,129,.04)">
+      <div class="section-label" style="color:var(--green);margin-bottom:10px">💰 Avances reçues</div>
+      <div class="grid2">
+        <div class="field"><label>Avance DZD</label><input id="f-avdzd" type="number" value="${c.avanceDZD||0}" placeholder="0" inputmode="decimal"/></div>
+        <div class="field"><label>Avance EUR</label><input id="f-aveur" type="number" value="${c.avanceEUR||0}" placeholder="0" inputmode="decimal"/></div>
+      </div>
+    </div>
+    <div class="field"><label>Notes / Remarques</label><textarea id="f-notes" placeholder="Informations complémentaires...">${c.notes||""}</textarea></div>
+    <div class="field"><label>Statut prime</label><select id="f-status"><option ${c.status==="Non payé"?"selected":""}>Non payé</option><option ${c.status==="Payé"?"selected":""}>Payé</option></select></div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="btn btn-ghost" style="flex:1" data-action="modal-close">Annuler</button>
+      <button class="btn btn-primary" style="flex:1" data-action="chantier-save" data-id="${id||""}">${I("save",16)} ${isEdit?"Modifier":"Créer"}</button>
+    </div>
+  </div>`;
+  openModal(isEdit?"Modifier chantier":"Nouveau chantier",html,()=>{});
+}
+
+// ═══════════════════════════════════════════════════════
+// DEPENSES
+// ═══════════════════════════════════════════════════════
+let depFilter="all",depSort="date-desc",depSearch="";
+
+function pageDepenses(){
+  let deps=[...DATA.depenses];
+  // Filtre
+  if(depFilter==="nonpaye")deps=deps.filter(d=>d.status==="Non Payé");
+  else if(depFilter==="paye")deps=deps.filter(d=>d.status==="Payé");
+  else if(depFilter==="dzd")deps=deps.filter(d=>d.devise==="DZD");
+  else if(depFilter==="eur")deps=deps.filter(d=>d.devise==="EUR");
+  // Recherche
+  if(depSearch.trim()){
+    const q=depSearch.toLowerCase();
+    deps=deps.filter(d=>{
+      const ch=DATA.chantiers.find(c=>c.id===d.chantierId);
+      return (d.description||"").toLowerCase().includes(q)||(ch?.nom||"").toLowerCase().includes(q)||(d.categorie||"").toLowerCase().includes(q);
+    });
+  }
+  // Tri
+  deps.sort((a,b)=>{
+    if(depSort==="date-desc")return (b.date||"").localeCompare(a.date||"");
+    if(depSort==="date-asc")return (a.date||"").localeCompare(b.date||"");
+    if(depSort==="montant-desc")return b.montant-a.montant;
+    if(depSort==="montant-asc")return a.montant-b.montant;
+    return 0;
+  });
+  const totalDZD=deps.filter(d=>d.devise==="DZD").reduce((s,d)=>s+d.montant,0);
+  const totalEUR=deps.filter(d=>d.devise==="EUR").reduce((s,d)=>s+d.montant,0);
+
+  return `<div class="space16">
+    <div><h1>Dépenses</h1><p class="page-sub">${DATA.depenses.length} entrée${DATA.depenses.length!==1?"s":""}</p></div>
+    <input class="search-bar" id="dep-search" placeholder="🔍 Rechercher description, chantier..." value="${depSearch}" data-action="dep-search-input"/>
+    <div class="filter-tabs">
+      <button class="filter-tab ${depFilter==="all"?"active":""}" data-filter="all">Toutes</button>
+      <button class="filter-tab ${depFilter==="dzd"?"active":""}" data-filter="dzd">DZD</button>
+      <button class="filter-tab ${depFilter==="eur"?"active":""}" data-filter="eur">EUR</button>
+      <button class="filter-tab ${depFilter==="nonpaye"?"active":""}" data-filter="nonpaye">Non payées</button>
+      <button class="filter-tab ${depFilter==="paye"?"active":""}" data-filter="paye">Payées</button>
+    </div>
+    <div class="row-between" style="gap:8px">
+      <div style="font-size:12px;color:var(--text3)">${deps.length} résultat${deps.length!==1?"s":""}</div>
+      <select id="dep-sort" data-action="dep-sort-change" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:12px;color:var(--text2);outline:none;font-family:var(--font-body)">
+        <option value="date-desc" ${depSort==="date-desc"?"selected":""}>Date ↓</option>
+        <option value="date-asc" ${depSort==="date-asc"?"selected":""}>Date ↑</option>
+        <option value="montant-desc" ${depSort==="montant-desc"?"selected":""}>Montant ↓</option>
+        <option value="montant-asc" ${depSort==="montant-asc"?"selected":""}>Montant ↑</option>
+      </select>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="card" style="padding:12px;border-left:3px solid #60a5fa">
+        <div class="stat-label">Total DZD</div>
+        <div style="font-family:var(--font-title);font-weight:800;font-size:15px;color:#60a5fa">${fmtDZD(totalDZD)}</div>
+      </div>
+      <div class="card" style="padding:12px;border-left:3px solid var(--amber)">
+        <div class="stat-label">Total EUR</div>
+        <div style="font-family:var(--font-title);font-weight:800;font-size:15px;color:var(--amber)">${fmtEUR(totalEUR)}</div>
+      </div>
+    </div>
+    ${deps.length===0?`<div class="empty"><div class="empty-icon">💰</div><p>${depSearch?"Aucun résultat":"Aucune dépense"}</p></div>`:`
+    <div class="space8">${deps.map(d=>{
+      const ch=DATA.chantiers.find(c=>c.id===d.chantierId);
+      return `<div class="card">
+        <div class="row-between" style="margin-bottom:8px">
+          <div style="flex:1;min-width:0;margin-right:8px">
+            <div style="font-size:14px;font-weight:600">${esc(d.description)||"—"}</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">${esc(ch?.nom)||"?"} · ${d.date}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="font-size:14px;font-weight:700;color:${d.devise==="EUR"?"var(--amber)":"#60a5fa"}">${fmt(d.montant)} ${d.devise}</div>
+          </div>
+        </div>
+        <div class="row-between">
+          <div class="pills"><span class="pill pill-gray">${d.categorie}</span><span class="pill ${d.status==="Payé"?"pill-green":"pill-red"}">${d.status}</span>${d.justificatif?`<span class="pill pill-blue">🖼 Justif</span>`:""}</div>
+          <div style="display:flex;gap:5px">
+            ${d.justificatif?`<button class="btn btn-blue btn-icon btn-sm" data-action="dep-justif" data-id="${d.id}">🖼</button>`:""}
+            <button class="btn btn-orange btn-icon btn-sm" data-action="dep-edit" data-id="${d.id}">${I("edit",15)}</button>
+            <button class="btn btn-success btn-icon btn-sm" data-action="dep-toggle" data-id="${d.id}">${I("check",15)}</button>
+            <button class="btn btn-danger btn-icon btn-sm" data-action="dep-delete" data-id="${d.id}">${I("trash",15)}</button>
+          </div>
+        </div>
+      </div>`;
+    }).join("")}</div>`}
+  </div>
+  <button class="btn-fab" data-action="dep-new">${I("plus",24)}</button>`;
+}
+
+function modalDepForm(defaultChantierId, editId){
+  const isEdit=!!editId;
+  const existing=isEdit?DATA.depenses.find(d=>d.id===editId):null;
+  const today=new Date().toISOString().split("T")[0];
+  const cats=getCats();
+  const selChantierId=isEdit?existing.chantierId:defaultChantierId;
+
+  const html=`<div class="space16">
+    ${!selChantierId?`<div class="field"><label>Chantier *</label><select id="f-chantier">${DATA.chantiers.map(c=>`<option value="${c.id}">${c.nom}</option>`).join("")}</select></div>`:`<input type="hidden" id="f-chantier" value="${selChantierId}"/>`}
+    <div class="grid2">
+      <div class="field"><label>Date</label><input id="f-date" type="date" value="${isEdit?existing.date:today}"/></div>
+      <div class="field"><label>Catégorie</label><select id="f-cat">${cats.map(c=>`<option ${isEdit&&existing.categorie===c?"selected":""}>${c}</option>`).join("")}</select></div>
+    </div>
+    <div class="field"><label>Description</label><input id="f-desc" type="text" value="${isEdit?existing.description:""}" placeholder="Ex: taxi aéroport"/></div>
+    <div class="grid2">
+      <div class="field"><label>Montant *</label><input id="f-montant" type="number" value="${isEdit?existing.montant:""}" placeholder="0" inputmode="decimal"/></div>
+      <div class="field"><label>Devise</label><select id="f-devise">
+        <option ${!isEdit||existing.devise==="DZD"?"selected":""}>DZD</option>
+        <option ${isEdit&&existing.devise==="EUR"?"selected":""}>EUR</option>
+        <option ${isEdit&&existing.devise==="USD"?"selected":""}>USD</option>
+      </select></div>
+    </div>
+    <div class="field"><label>Statut</label><select id="f-status">
+      <option value="Non Payé" ${!isEdit||existing.status==="Non Payé"?"selected":""}>Non Payé</option>
+      <option value="Payé" ${isEdit&&existing.status==="Payé"?"selected":""}>Payé</option>
+    </select></div>
+    <div class="card" style="padding:12px;border-color:rgba(167,139,250,.3)">
+      <div class="section-label" style="color:var(--purple);margin-bottom:10px"> Justificatif</div>
+      <div id="justif-preview-wrap" style="margin-bottom:10px;${isEdit&&existing.justificatif?'':'display:none'}">
+        <img id="justif-preview" src="${isEdit&&existing.justificatif?existing.justificatif:''}" style="max-width:100%;border-radius:10px;border:1px solid var(--border)"/>
+        <button type="button" onclick="clearJustif()" style="margin-top:6px;font-size:11px;background:var(--bg3);border:1px solid var(--border);color:var(--red);border-radius:8px;padding:4px 10px;cursor:pointer"> Supprimer</button>
+      </div>
+      <div style="display:flex;gap:8px">
+        <label class="btn btn-ghost btn-sm" style="flex:1;cursor:pointer;text-align:center"> Photo<input type="file" id="f-justif" accept="image/*" capture="environment" style="display:none" onchange="previewJustif(this)"/></label>
+        <label class="btn btn-ghost btn-sm" style="flex:1;cursor:pointer;text-align:center">🖼 Galerie
+      </div>
+      <div style="font-size:10px;color:var(--text3);margin-top:6px">Image compressée automatiquement (max 1200px)</div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="btn btn-ghost" style="flex:1" data-action="modal-close">Annuler</button>
+      <button class="btn btn-primary" style="flex:1" data-action="dep-save" data-chantier-id="${selChantierId||""}" data-edit-id="${editId||""}">${I("save",16)} ${isEdit?"Modifier":"Enregistrer"}</button>
+    </div>
+  </div>`;
+  openModal(isEdit?"Modifier dépense":"Nouvelle dépense",html,()=>{});
+}
+
+// ═══════════════════════════════════════════════════════
+// PARAMÈTRES
+// ═══════════════════════════════════════════════════════
+function pageParametres(){
+  const p=DATA.parametres,pr=p.profil||{},cats=getCats();
+  return `<div class="space16">
+    <h1>Paramètres</h1>
+    <div class="card">
+      <div class="section-label">👤 Profil employé</div>
+      <div class="space12">
+        <div class="grid2">
+          <div class="field"><label>Nom</label><input id="p-nom" type="text" value="${pr.nom||""}"/></div>
+          <div class="field"><label>Prénom</label><input id="p-prenom" type="text" value="${pr.prenom||""}"/></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>Matricule</label><input id="p-mat" type="text" value="${pr.matricule||""}"/></div>
+          <div class="field"><label>Entreprise</label><input id="p-ent" type="text" value="${pr.entreprise||""}"/></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-label">💶 Taux journaliers par défaut</div>
+      <div class="grid2">
+        <div class="field"><label>Interne (€/j)</label><input id="p-ti" type="number" value="${p.tauxInterne}" inputmode="numeric"/></div>
+        <div class="field"><label>Externe (€/j)</label><input id="p-te" type="number" value="${p.tauxExterne}" inputmode="numeric"/></div>
+      </div>
+    </div>
+    <div class="card" style="border-color:rgba(239,68,68,.3)">
+      <div class="section-label" style="color:var(--red)">🔔 Seuil d'alerte dépenses non remboursées</div>
+      <div class="field"><label>Alerter après X jours sans remboursement</label><input id="p-alerte" type="number" value="${p.alerteJours||30}" inputmode="numeric" min="1"/></div>
+    </div>
+    <div class="card">
+      <div class="section-label">💱 Taux de change</div>
+      <div class="space12">${Object.entries(p.taux).map(([dev,rates])=>`
+        <div style="border:1px solid var(--border);border-radius:12px;padding:12px">
+          <div style="font-size:12px;font-weight:700;color:var(--amber);margin-bottom:10px">${dev}</div>
+          <div class="grid2">
+            <div class="field"><label>→ DZD</label><input class="p-taux" data-dev="${dev}" data-dir="dzd" type="number" value="${rates.dzd}" step="0.0001" inputmode="decimal"/></div>
+            <div class="field"><label>→ EUR</label><input class="p-taux" data-dev="${dev}" data-dir="eur" type="number" value="${rates.eur}" step="0.0001" inputmode="decimal"/></div>
+          </div>
+        </div>`).join("")}
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-label">🏷️ Catégories</div>
+      <div class="space8">${cats.map((cat,i)=>{const used=DATA.depenses.some(d=>d.categorie===cat);return`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg2);border-radius:10px;border:1px solid var(--border)"><span style="font-size:13px">${cat}</span><button class="btn btn-danger btn-icon btn-sm" data-action="cat-delete" data-cat-idx="${i}" ${used?"disabled":""} title="${used?"Utilisée":"Supprimer"}">${I("x",14)}</button></div>`;}).join("")}</div>
+      <div class="row" style="gap:8px;margin-top:12px">
+        <input id="new-cat" type="text" placeholder="Nouvelle catégorie..." style="flex:1;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--text);outline:none;font-family:var(--font-body)"/>
+        <button class="btn btn-primary btn-sm" data-action="cat-add">${I("plus",16)} Ajouter</button>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-full" data-action="params-save">${I("save",16)} Enregistrer les paramètres</button>
+    <div class="card" style="border-color:rgba(96,165,250,.3)">
+      <div class="section-label" style="color:#93c5fd">🔄 Synchronisation PC</div>
+      <div class="space12">
+        <div class="field">
+          <label>Adresse IP du serveur PC</label>
+          <div style="display:flex;gap:8px">
+            <input id="p-syncip" type="url" value="${DATA.sync?.serverIP||''}" placeholder="http://192.168.1.15:3000" style="flex:1"/>
+            <button class="btn btn-blue btn-sm" data-action="sync-test">Tester</button>
+          </div>
+          <div id="sync-test-result" style="font-size:11px;margin-top:4px"></div>
+        </div>
+        <div style="font-size:11px;color:var(--text3);padding:0 2px">
+          💡 Lancez <strong>LANCER_SERVEUR.bat</strong> sur votre PC, puis entrez l'IP affichée.
+        </div>
+        <button class="btn btn-blue btn-full" data-action="sync-now">
+          🔄 Synchroniser maintenant
+        </button>
+        <div id="sync-result-full"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">📄 Export PDF</div>
+      <div class="space8">
+        <button class="btn btn-blue btn-full" data-action="export-pdf-global">📄 Synthèse PDF — Tous les chantiers</button>
+        <p style="font-size:11px;color:var(--text3)">Export individuel disponible dans chaque chantier.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-label">📊 Export données</div>
+      <div class="space8">
+        <button class="btn btn-ghost btn-full" data-action="export-csv">⬇ Exporter CSV (Excel)</button>
+        <button class="btn btn-ghost btn-full" data-action="export-json">⬇ Sauvegarde JSON</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-label">📥 Restauration</div>
+      <div class="space8">
+        <button class="btn btn-ghost btn-full" data-action="import-json">⬆ Restaurer depuis JSON</button>
+        <p style="font-size:11px;color:var(--red)">⚠️ Remplace toutes les données actuelles</p>
+      </div>
+    </div>
+    <div style="height:20px"></div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// MODAL ENGINE
+// ═══════════════════════════════════════════════════════
+function openModal(title,content,onClose){
+  const div=document.createElement("div");
+  div.className="modal";
+  div.innerHTML=`<div class="modal-header"><button class="btn btn-ghost btn-icon" data-action="modal-close">${I("back")}</button><h2 style="font-size:16px">${title}</h2></div><div class="modal-body">${content}</div>`;
+  document.getElementById("app").appendChild(div);
+  modalStack.push({div,onClose});
+  attachModalEvents(div);
+}
+function closeModal(){
+  if(!modalStack.length)return;
+  const{div,onClose}=modalStack.pop();
+  div.remove();if(onClose)onClose();
+}
+function closeAllModals(){
+  while(modalStack.length){const{div}=modalStack.pop();div.remove();}
+  render();
+}
+
+// ═══════════════════════════════════════════════════════
+// OVERLAYS
+// ═══════════════════════════════════════════════════════
+function showConfirm(title,msg,cb){
+  const div=document.createElement("div");
+  div.className="overlay";
+  div.innerHTML=`<div class="confirm-box"><h3>${title}</h3><p>${msg}</p><div style="display:flex;gap:10px"><button class="btn btn-ghost" style="flex:1" id="cc">Annuler</button><button class="btn btn-danger" style="flex:1" id="co">Supprimer</button></div></div>`;
+  document.getElementById("app").appendChild(div);
+  div.querySelector("#cc").onclick=()=>div.remove();
+  div.querySelector("#co").onclick=()=>{div.remove();cb();};
+  div.onclick=e=>{if(e.target===div)div.remove();};
+}
+function showConversionModal(montant,devise,cb){
+  const taux=DATA.parametres.taux[devise]?.eur||0;
+  const eur=parseFloat((montant*taux).toFixed(2));
+  const div=document.createElement("div");
+  div.className="overlay";
+  div.innerHTML=`<div class="confirm-box">
+    <h3>💱 Conversion en EUR ?</h3>
+    <div style="display:flex;align-items:center;gap:12px;margin:16px 0;padding:14px;background:var(--bg2);border-radius:12px;border:1px solid var(--border2)">
+      <div style="flex:1;text-align:center"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Montant saisi</div><div style="font-family:var(--font-title);font-weight:800;font-size:19px;color:#60a5fa">${fmt(montant)} ${devise}</div></div>
+      <div style="color:var(--text3);font-size:22px">→</div>
+      <div style="flex:1;text-align:center"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Équivalent EUR</div><div style="font-family:var(--font-title);font-weight:800;font-size:19px;color:var(--amber)">${fmtEUR(eur)}</div></div>
+    </div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:20px">Taux : 1 ${devise} = ${taux} EUR</p>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn btn-primary btn-full" id="cv-eur">✓ Enregistrer en EUR — ${fmtEUR(eur)}</button>
+      <button class="btn btn-ghost btn-full" id="cv-orig">Garder en ${devise} — ${fmt(montant)} ${devise}</button>
+    </div>
+  </div>`;
+  document.getElementById("app").appendChild(div);
+  div.querySelector("#cv-eur").onclick=()=>{div.remove();cb(eur,"EUR");};
+  div.querySelector("#cv-orig").onclick=()=>{div.remove();cb(montant,devise);};
+}
+
+// ═══════════════════════════════════════════════════════
+// EXPORTS
+// ═══════════════════════════════════════════════════════
+function downloadFile(name,type,content){
+  const blob=new Blob([content],{type});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;a.download=name;
+  document.body.appendChild(a);a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function exportCSV(){
+  const rows=[["Chantier","Type","Localisation","Date","Catégorie","Description","Montant","Devise","Statut","Avance DZD","Avance EUR"],
+    ...DATA.depenses.map(d=>{const ch=DATA.chantiers.find(c=>c.id===d.chantierId);return[ch?.nom||"?",ch?.type||"",ch?.localisation||"",d.date,d.categorie,d.description,d.montant,d.devise,d.status,ch?.avanceDZD||0,ch?.avanceEUR||0];})];
+  downloadFile("gpc_depenses.csv","text/csv;charset=utf-8","\uFEFF"+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n"));
+}
+function exportJSON(){downloadFile("gpc_sauvegarde.json","application/json",JSON.stringify(DATA,null,2));}
+function importJSON(){
+  const input=document.createElement("input");input.type="file";input.accept=".json";
+  input.onchange=e=>{
+    const file=e.target.files?.[0];if(!file)return;
+    const reader=new FileReader();
+    reader.onload=ev=>{try{const nd=JSON.parse(ev.target.result);if(!nd.chantiers||!nd.depenses)throw new Error();DATA=nd;save();render();showToast("✓ Restauration réussie");}catch{alert("Fichier invalide.");}};
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function exportPDF(chantierId){
+  const p=DATA.parametres.profil||{};
+  const nomEmploye=[p.prenom,p.nom].filter(Boolean).join(" ")||"";
+  const now=new Date().toLocaleDateString("fr-FR");
+  const chantiers=chantierId?DATA.chantiers.filter(c=>c.id===chantierId):DATA.chantiers;
+  const pageTitle=chantierId?`Rapport — ${chantiers[0]?.nom||""}`:"Synthèse Globale — Primes & Dépenses";
+  const allDepDZD=DATA.depenses.filter(d=>d.devise==="DZD").reduce((s,d)=>s+d.montant,0);
+  const allDepEUR=DATA.depenses.filter(d=>d.devise==="EUR").reduce((s,d)=>s+d.montant,0);
+  const allPrimes=DATA.chantiers.reduce((s,c)=>s+calcPrime(c),0);
+
+  const chantiersHTML=chantiers.map(c=>{
+    const prime=calcPrime(c);
+    const deps=DATA.depenses.filter(d=>d.chantierId===c.id);
+    const cTotalDZD=deps.filter(d=>d.devise==="DZD").reduce((s,d)=>s+d.montant,0);
+    const cTotalEUR=deps.filter(d=>d.devise==="EUR").reduce((s,d)=>s+d.montant,0);
+    const cAvDZD=c.avanceDZD||0, cAvEUR=c.avanceEUR||0;
+    const cNetDZD=Math.max(0,cTotalDZD-cAvDZD);
+    const cNetEUR=Math.max(0,cTotalEUR-cAvEUR);
+    const cEcart=prime-cNetEUR;
+
+    const depsRows=deps.map(d=>`
+      <tr>
+        <td>${d.date}</td>
+        <td>${d.categorie}</td>
+        <td>${d.description||"—"}</td>
+        <td style="text-align:right;font-weight:600;color:${d.devise==="EUR"?"#b45309":"#1d4ed8"}">${fmt(d.montant)} ${d.devise}</td>
+      <td><span style="padding:2px 8px;border-radius:4px;font-size:10px;background:${d.status==="Payé"?"#dcfce7":"#fee2e2"};color:${d.status==="Payé"?"#166534":"#991b1b"}">${d.status}</span></td>
+        <td style="text-align:center">${d.justificatif?`<img src="${d.justificatif}" style="width:70px;height:50px;object-fit:cover;border-radius:4px;border:1px solid #e5e7eb"/>`:`<span style="color:#ccc;font-size:10px">—</span>`}</td>
+      </tr>`).join("");
+
+    return `
+    <div class="cb">
+      <div class="ch">
+        <div>
+          <div class="ch-nom">${c.nom}</div>
+          <div class="ch-meta">${c.type} · ${c.jours} jour${c.jours!==1?"s":""} · ${c.dateDebut||"NC"}${c.localisation?" · "+c.localisation:""} · <span style="color:${c.status==="Payé"?"#166534":"#991b1b"}">${c.status}</span></div>
+          ${c.notes?`<div style="font-size:11px;color:#6b7280;margin-top:4px;font-style:italic">${c.notes}</div>`:""}
+        </div>
+        <div class="prime">Prime: ${fmtEUR(prime)}</div>
+      </div>
+      <div class="totals">
+        <div class="tb"><div class="tl">Dépenses DZD</div><div class="tv blue">${fmtDZD(cTotalDZD)}</div></div>
+        ${cAvDZD>0?`<div class="tb"><div class="tl">Avance DZD</div><div class="tv green">-${fmtDZD(cAvDZD)}</div></div><div class="tb"><div class="tl">Net DZD</div><div class="tv red">${fmtDZD(cNetDZD)}</div></div>`:""}
+        <div class="tb"><div class="tl">Dépenses EUR</div><div class="tv amber">${fmtEUR(cTotalEUR)}</div></div>
+        ${cAvEUR>0?`<div class="tb"><div class="tl">Avance EUR</div><div class="tv green">-${fmtEUR(cAvEUR)}</div></div><div class="tb"><div class="tl">Net EUR</div><div class="tv red">${fmtEUR(cNetEUR)}</div></div>`:""}
+        <div class="tb"><div class="tl">Écart prime/EUR</div><div class="tv ${cEcart>=0?"green":"red"}">${fmtEUR(cEcart)}</div></div>
+      </div>
+      ${deps.length>0?`<table><thead><tr><th>Date</th><th>Catégorie</th><th>Description</th><th>Montant</th><th>Statut</th><th>Justificatif</th></tr></thead><tbody>${depsRows}</tbody></table>`:`<p style="color:#999;font-style:italic;padding:10px 14px">Aucune dépense enregistrée</p>`}
+    </div>`;
+  }).join("");
+
+  const pdfHtml=`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"/><title>${pageTitle}</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#111;background:#fff;padding:20px}
+    .hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;padding-bottom:14px;border-bottom:3px solid #f59e0b}
+    .hdr h1{font-size:17px;margin-bottom:4px}.hdr-r{text-align:right;font-size:11px;color:#555}
+    .summary{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+    .sb{flex:1;min-width:110px;background:#f8f8f8;border-radius:6px;padding:10px;border-left:3px solid #f59e0b}
+    .sl{font-size:10px;color:#888;margin-bottom:3px}.sv{font-size:14px;font-weight:800}
+    .cb{margin-bottom:24px;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;page-break-inside:avoid}
+    .ch{display:flex;justify-content:space-between;align-items:flex-start;background:#fef3c7;padding:12px 14px;border-bottom:1px solid #fde68a}
+    .ch-nom{font-size:14px;font-weight:bold}.ch-meta{font-size:11px;color:#555;margin-top:3px}
+    .prime{font-weight:800;font-size:14px;color:#92400e;white-space:nowrap;margin-left:12px}
+    .totals{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px;background:#f9fafb;border-bottom:1px solid #e5e7eb}
+    .tb{background:#fff;border:1px solid #e5e7eb;border-radius:6px;padding:6px 10px;min-width:110px}
+    .tl{font-size:10px;color:#888;margin-bottom:2px}.tv{font-size:13px;font-weight:700}
+    .blue{color:#1d4ed8}.amber{color:#b45309}.green{color:#166534}.red{color:#991b1b}
+    table{width:100%;border-collapse:collapse;font-size:11px}
+    th{background:#f59e0b;color:#fff;padding:6px 8px;text-align:left;font-size:10px;font-weight:600}
+    td{padding:6px 8px;border-bottom:1px solid #f3f4f6;vertical-align:middle}
+    tr:last-child td{border-bottom:none}
+    tr:nth-child(even) td{background:#fafafa}
+  </style></head><body>
+  <div class="hdr">
+    <div>
+      <h1>🏗️ ${pageTitle}</h1>
+      <div style="color:#555;margin-top:4px;font-size:11px">Généré le ${now}</div>
+    </div>
+    <div class="hdr-r">
+      ${nomEmploye?`<div style="font-weight:bold;font-size:13px">${nomEmploye}</div>`:""}
+      ${p.matricule?`<div>Matricule : ${p.matricule}</div>`:""}
+      ${p.entreprise?`<div>${p.entreprise}</div>`:""}
+    </div>
+  </div>
+  ${!chantierId?`
+  <div class="summary">
+    <div class="sb"><div class="sl">Chantiers</div><div class="sv">${DATA.chantiers.length}</div></div>
+    <div class="sb"><div class="sl">Total primes</div><div class="sv amber">${fmtEUR(allPrimes)}</div></div>
+    <div class="sb"><div class="sl">Total dép. DZD</div><div class="sv blue">${fmtDZD(allDepDZD)}</div></div>
+    <div class="sb"><div class="sl">Total dép. EUR</div><div class="sv amber">${fmtEUR(allDepEUR)}</div></div>
+  </div>`:""}
+  ${chantiersHTML}
+  <script>window.onload=()=>window.print();<\/script>
+  </body></html>`;
+
+  const w=window.open("","_blank");
+  if(w){w.document.write(pdfHtml);w.document.close();}
+  else showToast("⚠️ Autorisez les pop-ups pour le PDF");
+}
+
+// ═══════════════════════════════════════════════════════
+// EVENT DELEGATION
+// ═══════════════════════════════════════════════════════
+function attachPageEvents(){
+  if(pageAbortController)pageAbortController.abort();
+  pageAbortController=new AbortController();
+  const signal=pageAbortController.signal;
+  const content=document.getElementById("content");
+
+  document.getElementById("nav").addEventListener("click",e=>{
+    const btn=e.target.closest("[data-tab]");if(btn)switchTab(btn.dataset.tab);
+  },{signal});
+
+  content.addEventListener("click",e=>{
+    const ft=e.target.closest("[data-filter]");
+    if(ft){depFilter=ft.dataset.filter;render();return;}
+    const el=e.target.closest("[data-action]");if(el)handleAction(el);
+  },{signal});
+
+  content.addEventListener("input",e=>{
+    if(e.target.id==="dep-search"){depSearch=e.target.value;render();}
+  },{signal});
+
+  content.addEventListener("change",e=>{
+    if(e.target.id==="dep-sort"){depSort=e.target.value;render();}
+  },{signal});
+}
+
+function attachModalEvents(modal){
+  modal.addEventListener("click",e=>{
+    const el=e.target.closest("[data-action]");if(el)handleAction(el);
+  });
+}
+
+function handleAction(el){
+  const action=el.dataset.action,id=el.dataset.id;
+  if(action==="modal-close"){closeModal();return;}
+  // CHANTIERS
+  if(action==="chantier-detail"){modalChantierDetail(id);return;}
+  if(action==="chantier-new"){modalChantierForm(null);return;}
+  if(action==="chantier-edit"){closeModal();modalChantierForm(id);return;}
+  if(action==="chantier-delete"){
+    showConfirm("Supprimer ce chantier ?","Toutes les dépenses associées seront aussi supprimées.",()=>{
+      const now=new Date().toISOString();
+      DATA.depenses.filter(d=>d.chantierId===id).forEach(d=>{
+        DATA.deletedIds.push({id:d.id, type:"depense", deletedAt:now});
+      });
+      DATA.deletedIds.push({id, type:"chantier", deletedAt:now});
+
+      DATA.chantiers=DATA.chantiers.filter(c=>c.id!==id);
+      DATA.depenses=DATA.depenses.filter(d=>d.chantierId!==id);
+      save();closeAllModals();
+    });return;
+  
+  }
+  if(action==="chantier-toggle"){
+    DATA.chantiers=DATA.chantiers.map(c=>c.id===id?{...c,status:c.status==="Payé"?"Non payé":"Payé"}:c);
+    save();closeAllModals();modalChantierDetail(id);return;
+  }
+  if(action==="chantier-save"){
+    const nom=document.getElementById("f-nom")?.value?.trim();
+    if(!nom){document.getElementById("f-nom")?.focus();return;}
+    const form={nom,jours:+document.getElementById("f-jours")?.value||0,type:document.getElementById("f-type")?.value,localisation:document.getElementById("f-loc")?.value||"",dateDebut:document.getElementById("f-date")?.value||"",tauxInterne:+document.getElementById("f-ti")?.value||DATA.parametres.tauxInterne,tauxExterne:+document.getElementById("f-te")?.value||DATA.parametres.tauxExterne,avanceDZD:+document.getElementById("f-avdzd")?.value||0,avanceEUR:+document.getElementById("f-aveur")?.value||0,notes:document.getElementById("f-notes")?.value||"",status:document.getElementById("f-status")?.value||"Non payé"};
+    
+    const now=new Date().toISOString();
+    if(id){DATA.chantiers=DATA.chantiers.map(c=>c.id===id?{...c,...form,updatedAt:now}:c);}
+    else{DATA.chantiers.push({id:uid(),...form,updatedAt:now});}
+    save();closeAllModals();return;
+  }
+  // DEPENSES
+  if(action==="dep-new"){modalDepForm(null,null);return;}
+  if(action==="dep-new-for"){modalDepForm(el.dataset.chantierId,null);return;}
+  if(action==="dep-justif"){const d=DATA.depenses.find(x=>x.id===id);if(d?.justificatif)showJustifModal(d.justificatif);return;}
+  if(action==="dep-edit"){modalDepForm(null,id);return;}
+  if(action==="dep-toggle"){
+    DATA.depenses=DATA.depenses.map(d=>d.id===id?{...d,status:d.status==="Payé"?"Non Payé":"Payé"}:d);
+    save();
+    if(modalStack.length>0){const cid=DATA.depenses.find(d=>d.id===id)?.chantierId;if(cid){closeModal();modalChantierDetail(cid);}}else{render();}
+    return;
+  }
+ if(action==="dep-delete"){
+    showConfirm("Supprimer cette dépense ?","Cette action est irréversible.",()=>{
+      const cid=DATA.depenses.find(d=>d.id===id)?.chantierId;
+      DATA.deletedIds.push({id, type:"depense", deletedAt:new Date().toISOString()});
+      DATA.depenses=DATA.depenses.filter(d=>d.id!==id);
+      save();
+      if(cid&&modalStack.length>0){closeModal();modalChantierDetail(cid);}else{closeAllModals();}
+    });return;
+  }
+  if(action==="dep-save"){
+    const montant=parseFloat(document.getElementById("f-montant")?.value);
+    const devise=document.getElementById("f-devise")?.value||"DZD";
+    const chantierId=el.dataset.chantierId||document.getElementById("f-chantier")?.value;
+    const editId=el.dataset.editId||"";
+    if(!montant||isNaN(montant)||!chantierId){if(!montant)document.getElementById("f-montant")?.focus();return;}
+    const depData={chantierId,date:document.getElementById("f-date")?.value||new Date().toISOString().split("T")[0],categorie:document.getElementById("f-cat")?.value||getCats()[0],description:document.getElementById("f-desc")?.value||"",status:document.getElementById("f-status")?.value||"Non Payé"};
+    const doSave=(finalMontant,finalDevise)=>{
+      if(editId){
+DATA.depenses=DATA.depenses.map(d=>d.id===editId?{...d,...depData,montant:finalMontant,devise:finalDevise,justificatif:currentJustifData??d.justificatif??null,updatedAt:new Date().toISOString()}:d);
+      }else{
+DATA.depenses.push({id:uid(),...depData,montant:finalMontant,devise:finalDevise,justificatif:currentJustifData||null,updatedAt:new Date().toISOString()});
+      }
+      save();
+      currentJustifData = null;
+      closeModal();
+      if(chantierId&&modalStack.length>0){closeModal();modalChantierDetail(chantierId);}else{render();}
+    };
+    if(devise!=="EUR"&&DATA.parametres.taux[devise]){showConversionModal(montant,devise,doSave);}
+    else{doSave(montant,devise);}
+    return;
+  }
+  // PARAMÈTRES
+  if(action==="params-save"){
+    if(!DATA.parametres.profil)DATA.parametres.profil={};
+    DATA.parametres.profil.nom=document.getElementById("p-nom")?.value||"";
+    DATA.parametres.profil.prenom=document.getElementById("p-prenom")?.value||"";
+    DATA.parametres.profil.matricule=document.getElementById("p-mat")?.value||"";
+    DATA.parametres.profil.entreprise=document.getElementById("p-ent")?.value||"";
+    DATA.parametres.tauxInterne=+document.getElementById("p-ti")?.value||130;
+    DATA.parametres.tauxExterne=+document.getElementById("p-te")?.value||130;
+    DATA.parametres.alerteJours=+document.getElementById("p-alerte")?.value||30;
+    document.querySelectorAll(".p-taux").forEach(inp=>{const dev=inp.dataset.dev,dir=inp.dataset.dir;if(DATA.parametres.taux[dev])DATA.parametres.taux[dev][dir]=+inp.value;});
+    save();return;
+  }
+  if(action==="cat-add"){
+    const input=document.getElementById("new-cat");const val=input?.value?.trim();if(!val)return;
+    if(!DATA.parametres.categories.includes(val)){DATA.parametres.categories.push(val);save();}
+    if(input)input.value="";render();return;
+  }
+  if(action==="cat-delete"){
+    const idx=parseInt(el.dataset.catIdx);
+    if(!isNaN(idx)){DATA.parametres.categories.splice(idx,1);save();render();}return;
+  }
+  if(action==="sync-now"){syncNow(true);return;}
+  if(action==="sync-test"){testSyncConnection();return;}
+  if(action==="export-csv"){exportCSV();return;}
+  if(action==="export-json"){exportJSON();return;}
+  if(action==="import-json"){importJSON();return;}
+  if(action==="export-pdf-global"){exportPDF(null);return;}
+  if(action==="export-pdf-chantier"){exportPDF(id);return;}
+}
+
+// ═══════════════════════════════════════════════════════
+// SYNCHRONISATION
+// ═══════════════════════════════════════════════════════
+function getSyncIP(){return(DATA.sync?.serverIP||"").trim();}
+
+function setSyncStatus(state,label){
+  const btn=document.getElementById("sync-header-btn");
+  const ico=document.getElementById("sync-icon");
+  const lbl=document.getElementById("sync-label");
+  if(!btn)return;
+  btn.className="sync-btn sync-"+state;
+  if(ico)ico.innerHTML=state==="loading"?`<span class="sync-spin">⟳</span>`:(state==="ok"?"✓":"⇄");
+  if(lbl)lbl.textContent=label||"Sync";
+  if(state==="ok"||state==="err"){setTimeout(()=>setSyncStatus("idle","Sync"),4000);}
+}
+
+// ─── Barre de progression images ─────────────────────────────────────────────
+function showImageProgress(current, total, chantierNom){
+  let overlay = document.getElementById("img-progress-overlay");
+  if(!overlay){
+    overlay = document.createElement("div");
+    overlay.id = "img-progress-overlay";
+    overlay.className = "img-progress-overlay";
+    overlay.innerHTML = `<div class="img-progress-box">
+      <div class="img-progress-title">📤 Transfert des justificatifs</div>
+      <div class="img-progress-sub" id="img-progress-sub"></div>
+      <div class="img-progress-bar-bg"><div class="img-progress-bar-fill" id="img-progress-fill" style="width:0%"></div></div>
+      <div class="img-progress-count" id="img-progress-count"></div>
+    </div>`;
+    document.getElementById("app").appendChild(overlay);
+  }
+  const pct = total > 0 ? Math.round((current/total)*100) : 0;
+  document.getElementById("img-progress-sub").textContent = chantierNom || "";
+  document.getElementById("img-progress-fill").style.width = pct + "%";
+  document.getElementById("img-progress-count").textContent = `${current} / ${total} images`;
+}
+function hideImageProgress(){
+  const overlay = document.getElementById("img-progress-overlay");
+  if(overlay) overlay.remove();
+}
+
+// ─── Upload images vers PC ────────────────────────────────────────────────────
+async function uploadImages(ip){
+ const depsWithImages = DATA.depenses.filter(
+  d => d.justificatif 
+       && d.justificatif.startsWith("data:")
+       && !d.justifSynced
+);
+  if(depsWithImages.length === 0) return { uploaded: 0, errors: 0 };
+
+  let uploaded = 0, errors = 0;
+  showImageProgress(0, depsWithImages.length, "Préparation...");
+
+  for(let i = 0; i < depsWithImages.length; i++){
+    const dep = depsWithImages[i];
+    const chantier = DATA.chantiers.find(c => c.id === dep.chantierId);
+    const chantierNom = chantier?.nom || "Sans chantier";
+    showImageProgress(i, depsWithImages.length, `${chantierNom} — ${dep.description||dep.id}`);
+    try{
+      const res = await fetch(`${ip}/upload-image`, {
+        method: "POST",
+        headers: {"Content-Type":"application/json","ngrok-skip-browser-warning":"true"},
+        body: JSON.stringify({
+          depenseId: dep.id,
+          chantierNom: chantierNom,
+          imageData: dep.justificatif
+        }),
+        signal: AbortSignal.timeout(30000)
+      });
+
+    if(res.ok){
+  const json = await res.json();
+  uploaded++;
+
+  DATA.depenses = DATA.depenses.map(d =>
+    d.id === dep.id
+      ? {
+          ...d,
+          justifSynced: true,
+          justifServerPath: json.path // <-- chemin serveur sauvegardé
+        }
+      : d
+  );
+}
+       else { errors++; }
+    } catch(e){ errors++; }
+    showImageProgress(i+1, depsWithImages.length, `${chantierNom} — ${dep.description||dep.id}`);
+  }
+  hideImageProgress();
+  return { uploaded, errors };
+}
+
+async function syncNow(fromSettings){
+  const ip=getSyncIP();
+  if(!ip){
+    const r=fromSettings?document.getElementById("sync-result-full"):null;
+    if(r)r.innerHTML=`<div style="color:var(--red);font-size:12px;padding:8px 0">⚠️ Entrez d'abord l'adresse IP du serveur.</div>`;
+    else showToast("⚠️ Configurez l'IP dans Paramètres");
+    return;
+  }
+  setSyncStatus("loading","Synchro...");
+  const resultEl=fromSettings?document.getElementById("sync-result-full"):null;
+  if(resultEl)resultEl.innerHTML=`<div style="color:var(--text3);font-size:12px;padding:8px 0">⟳ Connexion en cours...</div>`;
+  try{
+    // ── ÉTAPE 1 : Sync des données (sans images) ──
+    const dataToSend={
+      ...DATA,
+      chantiers:DATA.chantiers.map(c=>({...c,updatedAt:c.updatedAt||'2000-01-01T00:00:00.000Z'})),
+      depenses:DATA.depenses.map(d=>({...d,updatedAt:d.updatedAt||'2000-01-01T00:00:00.000Z',justificatif:null})),
+      deletedIds:DATA.deletedIds||[],
+    };
+    const res=await fetch(`${ip}/sync`,{method:"POST",headers:{"Content-Type":"application/json","ngrok-skip-browser-warning":"true"},body:JSON.stringify(dataToSend),signal:AbortSignal.timeout(30000)});
+    if(!res.ok)throw new Error(`Serveur: ${res.status}`);
+    const result=await res.json();
+    if(!result.ok)throw new Error(result.error||"Erreur inconnue");
+
+    // Sauvegarder les images locales avant d'écraser
+const imagesLocales = {};
+DATA.depenses.forEach(d => {
+  if(d.justificatif) imagesLocales[d.id] = d.justificatif;
+});
+
+DATA.chantiers=result.merged.chantiers||DATA.chantiers;
+DATA.depenses=(result.merged.depenses||DATA.depenses).map(d => ({
+  ...d,
+  justificatif: imagesLocales[d.id] || d.justificatif || null
+}));
+    if(result.merged.parametres)DATA.parametres=result.merged.parametres;
+    DATA.deletedIds=result.merged.deletedIds||DATA.deletedIds||[];
+    if(!DATA.sync)DATA.sync={};
+    DATA.sync.lastSync=new Date().toISOString();
+    DATA.sync.serverIP=ip;
+    save();
+    const s=result.stats||{};
+
+    // ── ÉTAPE 2 : Upload des images justificatifs ──
+    const imgResult = await uploadImages(ip);
+
+    setSyncStatus("ok","Synchronisé ✓");
+    const imgInfo = imgResult.uploaded > 0 ? ` · 📷 ${imgResult.uploaded} image${imgResult.uploaded>1?"s":""}` : "";
+    showToast(`✓ ${s.totalChantiers||0} chantiers · ${s.totalDepenses||0} dépenses${imgInfo}`);
+    if(resultEl){
+      resultEl.innerHTML=`<div style="background:rgba(6,78,59,.2);border:1px solid rgba(16,185,129,.3);border-radius:10px;padding:12px;margin-top:8px">
+        <div style="font-weight:700;color:var(--green);margin-bottom:6px">✅ Synchronisation réussie</div>
+        <div style="font-size:12px;color:var(--text2)">${s.totalChantiers} chantiers · ${s.totalDepenses} dépenses</div>
+        ${imgResult.uploaded>0?`<div style="font-size:12px;color:var(--amber);margin-top:4px">📷 ${imgResult.uploaded} image${imgResult.uploaded>1?"s":""} transférée${imgResult.uploaded>1?"s":""} vers le PC</div>`:""}
+        ${imgResult.errors>0?`<div style="font-size:11px;color:var(--red);margin-top:2px">⚠️ ${imgResult.errors} image${imgResult.errors>1?"s":""} échouée${imgResult.errors>1?"s":""}</div>`:""}
+        <div style="font-size:11px;color:var(--text3);margin-top:4px">${new Date().toLocaleString("fr-FR")}</div>
+      </div>`;
+    }
+    render();
+  }catch(e){
+    hideImageProgress();
+    const errMsg=e.name==="TimeoutError"?"Délai dépassé — PC injoignable":e.message;
+    setSyncStatus("err","Échec");
+    showToast("❌ "+errMsg);
+    if(resultEl){resultEl.innerHTML=`<div style="background:rgba(127,29,29,.2);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:12px;margin-top:8px"><div style="font-weight:700;color:var(--red);margin-bottom:6px">❌ Connexion échouée</div><div style="font-size:12px;color:var(--text2)">${errMsg}</div><div style="font-size:11px;color:var(--text3);margin-top:6px">• LANCER_SERVEUR.bat ouvert sur PC ?<br>• Même WiFi ?<br>• IP correcte ?</div></div>`;}
+  }
+}
+
+async function testSyncConnection(){
+  const input = document.getElementById("p-syncip");
+  let ip = input?.value?.trim();
+  const result = document.getElementById("sync-test-result");
+  
+  if(!ip || !result) return;
+  
+  // Force le format correct si oublié
+  if(!ip.startsWith('http')) ip = 'http://' + ip;
+
+  result.innerHTML = `<span style="color:var(--text3)">⟳ Test en cours...</span>`;
+  
+  try {
+    const res = await fetch(`${ip}/ping`, { 
+    method: 'GET',
+    cache: 'no-store',
+    headers: {"ngrok-skip-browser-warning":"true"}
+
+    });
+
+    if (!res.ok) throw new Error(`Erreur HTTP: ${res.status}`);
+
+    const data = await res.json(); // C'est ici que l'erreur "token" arrivait
+    
+    if(data && data.ok) {
+      result.innerHTML = `<span style="color:var(--green)">✓ Serveur détecté ! (Heure PC : ${new Date(data.time).toLocaleTimeString()})</span>`;
+      // Sauvegarde l'IP pour que le bouton Sync du haut l'utilise
+      if(!DATA.sync) DATA.sync = {};
+      DATA.sync.serverIP = ip;
+      save(); 
+    }
+  } catch(e) {
+    console.error("Détail erreur test:", e);
+    result.innerHTML = `<span style="color:var(--red)">❌ Erreur : ${e.message}</span>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+render();
+
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("./sw.js").then(reg=>{
+    setInterval(()=>reg.update(),60000);
+    reg.addEventListener("updatefound",()=>{
+      const newSW=reg.installing;
+      newSW.addEventListener("statechange",()=>{
+        if(newSW.state==="installed"&&navigator.serviceWorker.controller)showUpdateBanner();
+      });
+    });
+  }).catch(()=>{});
+ // APRÈS
+let refreshing=false;
+navigator.serviceWorker.addEventListener("controllerchange",()=>{
+  if(!refreshing){
+    refreshing=true;
+    // Ne recharge que si aucun modal ouvert (pas de saisie en cours)
+    if(modalStack.length===0){
+      window.location.reload();
+    } else {
+      showToast("🔄 Mise à jour prête — ferme le formulaire pour l'appliquer");
+    }
+  }
+});
+}
+function showUpdateBanner(){
+  if(document.getElementById("update-banner"))return;
+  const banner=document.createElement("div");
+  banner.id="update-banner";
+  banner.style.cssText="position:fixed;top:0;left:0;right:0;z-index:999;background:#f59e0b;color:#09090b;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;font-family:var(--font-body);font-size:13px;font-weight:600;max-width:430px;margin:0 auto;box-shadow:0 2px 12px rgba(0,0,0,.3);";
+  banner.innerHTML=`<span>🔄 Nouvelle version disponible</span><button onclick="applyUpdate()" style="background:#09090b;color:#f59e0b;border:none;border-radius:8px;padding:6px 14px;font-weight:700;cursor:pointer;font-size:12px">Mettre à jour</button>`;
+  document.getElementById("app").prepend(banner);
+}
+function applyUpdate(){if(navigator.serviceWorker.controller)navigator.serviceWorker.controller.postMessage("SKIP_WAITING");}
+
+// ═══════════════════════════════════════════════════════
+// MODAL JUSTIFICATIF
+// ═══════════════════════════════════════════════════════
+function showJustifModal(src){
+  const div=document.createElement("div");
+  div.style.cssText="position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;max-width:430px;margin:0 auto;";
+  div.innerHTML=`
+    <div style="position:relative;width:100%;height:100%;display:flex;flex-direction:column;">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;flex-shrink:0;">
+        <span style="font-size:13px;color:#a1a1aa;">Justificatif</span>
+        <button id="jm-close" style="background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:50%;width:34px;height:34px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+      </div>
+      <div id="jm-wrap" style="flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;padding:16px;">
+        <img id="jm-img" src="${src}" style="max-width:100%;max-height:100%;border-radius:12px;transition:transform .2s;transform-origin:center;user-select:none;" draggable="false"/>
+      </div>
+      <div style="display:flex;gap:10px;padding:12px 16px;flex-shrink:0;">
+        <button id="jm-zoom-in"  style="flex:1;background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:10px;padding:10px;font-size:20px;cursor:pointer;">＋</button>
+        <button id="jm-zoom-out" style="flex:1;background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:10px;padding:10px;font-size:20px;cursor:pointer;">－</button>
+        <button id="jm-reset"    style="flex:1;background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:10px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;">Reset</button>
+      </div>
+    </div>`;
+  document.getElementById("app").appendChild(div);
+  let scale=1;
+  const img=div.querySelector("#jm-img");
+  const setScale=v=>{scale=Math.min(4,Math.max(1,v));img.style.transform=`scale(${scale})`;};
+  div.querySelector("#jm-zoom-in").onclick=()=>setScale(scale+0.5);
+  div.querySelector("#jm-zoom-out").onclick=()=>setScale(scale-0.5);
+  div.querySelector("#jm-reset").onclick=()=>setScale(1);
+  div.querySelector("#jm-close").onclick=()=>div.remove();
+  div.onclick=e=>{if(e.target===div)div.remove();};
+}
+
+// ═══════════════════════════════════════════════════════
+// JUSTIFICATIFS
+// ═══════════════════════════════════════════════════════
+let currentJustifData = null;
+
+function previewJustif(input) {
+  const file = input.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 1200;
+      const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+      currentJustifData = canvas.toDataURL("image/jpeg", 0.75);
+      const preview = document.getElementById("justif-preview");
+      const wrap = document.getElementById("justif-preview-wrap");
+      if (preview) preview.src = currentJustifData;
+      if (wrap) wrap.style.display = "";
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearJustif() {
+  currentJustifData = null;
+  const preview = document.getElementById("justif-preview");
+  const wrap = document.getElementById("justif-preview-wrap");
+  if (preview) preview.src = "";
+  if (wrap) wrap.style.display = "none";
+  const f1 = document.getElementById("f-justif");
+  const f2 = document.getElementById("f-justif-gallery");
+  if (f1) f1.value = "";
+  if (f2) f2.value = "";
+}
+</script>
+</body>
+</html>
